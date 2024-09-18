@@ -8,13 +8,13 @@ For more context, see [here](https://svenglinz.ovh/post.php?id=18)
 ```bash
 mkdir $HOME/ebnfValidator
 curl https://raw.githubusercontent.com/svensglinz/ebnfValidator/master/ebnfValidator.jar > $HOME/ebnfValidator/ebnfValidator.jar
-alias ebnfValidator="java -jar $HOME/ebnfValidator/ebnfValidator.jar"
+# echo "alias ebnfValidator='java -jar $HOME/ebnfValidator/ebnfValidator.jar' >> ~/.bashrc
 ```
 
 ## Uninstall
 ```bash
 rm -r $HOME/ebnfValidator
-unalias ebnfValidator
+# optionally remove alias
 ```
 
 ## Usage 
