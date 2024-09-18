@@ -18,12 +18,17 @@ rm -r $HOME/ebnfValidator
 ```
 
 ## Usage 
-1. Interactive shell mode 
+
+Create a text file that describes your grammar.
+- Each rule name must be wrapped in <>
+- Each line consists of one rule in the form of <RULENAME> <= RULE DESCRIPTION
+- each description can contain: literals, repetition {}, option [] or selection |
+- todo: precedence description
+
+For an example, see [here](grammar.txt)
+
+Then evaluate any expression against your grammar in the interactive shell
+
 ```bash
 ebnfValidator [PATH_TO_GRAMMAR]
-```
-
-2. Validate single statement
-```bash
-ebnfValidator [PATH_TO_GRAMMAR] [STATEMENT]
 ```
