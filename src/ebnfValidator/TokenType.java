@@ -1,0 +1,7 @@
+package ebnfValidator;
+
+public enum TokenType {
+    QUOTE, LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE,
+    RIGHT_BRACE, LEFT_BRACKET, RIGHT_BRACKET, SEP, RULE, LITERAL,
+    RULE_OPEN, RULE_CLOSE, EMPTY
+}
