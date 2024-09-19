@@ -153,7 +153,7 @@ public class GrammarValidator {
 
     }
 
-    // assumes that expression rule is entry point into grammar
+    // assumes that EXPRESSION rule is entry point into grammar
     public boolean isValid(String expression) {
         depth = 0;
         StatementLexer lexer = new StatementLexer(expression, grammar.literals);

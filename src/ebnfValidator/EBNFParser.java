@@ -24,10 +24,10 @@ class EBNFParser {
         Token current = peekToken();
         int target;
         switch (current.type) {
-            case LEFT_BRACE -> target = nextPosition(RIGHT_BRACE) + 1;
-            case LEFT_BRACKET -> target = nextPosition(SELECT_CLOSE) + 1;
-            case LEFT_PAREN -> target = nextPosition(RIGHT_PAREN) + 1;
-            case RIGHT_BRACE, SELECT_CLOSE, RIGHT_PAREN -> {
+            case SELECT_OPEN -> target = nextPosition(SELECT_CLOSE) + 1;
+            case GROUP_OPEN -> target = nextPosition(GROUP_CLOSE) + 1;
+            case MULTIPLE_OPEN -> target = nextPosition(MULTIPLE_CLOSE) + 1;
+            case GROUP_CLOSE, SELECT_CLOSE, MULTIPLE_CLOSE -> {
                 return false;
             }
             default -> target = index + 1;
@@ -92,14 +92,14 @@ class EBNFParser {
             switch (token.type) {
 
                 case RULE, LITERAL: currentElement().addElement(new Node(token)); break;
-                case LEFT_PAREN: currentElement().addElement(parseGroup()); break;
-                case LEFT_BRACE: {
+                case GROUP_OPEN: currentElement().addElement(parseGroup()); break;
+                case MULTIPLE_OPEN: {
                     GrammarElement e = parseMultiple();
                     currentElement().addElement(e);
                 } break;
-                case LEFT_BRACKET: currentElement().addElement(parseOption()); break;
+                case SELECT_OPEN: currentElement().addElement(parseOption()); break;
                 case OPTION: {} continue;
-                case RIGHT_PAREN, RIGHT_BRACE, SELECT_CLOSE: {
+                case GROUP_CLOSE, MULTIPLE_CLOSE, SELECT_CLOSE: {
                     elementStack.pop();
                     return group;
                 }
@@ -127,17 +127,18 @@ class EBNFParser {
             Token token = nextToken();
             switch (token.type) {
                 case RULE, LITERAL: currentElement().addElement(new Node(token)); break;
-                case LEFT_PAREN: {
+                case GROUP_OPEN: {
                     GrammarElement g = parseGroup();
                     currentElement().addElement(g);
                 } break;
-                case LEFT_BRACE: {
+                case MULTIPLE_OPEN: {
                     GrammarElement e = parseMultiple();
                     currentElement().addElement(e);
                 } break;
-                case LEFT_BRACKET: currentElement().addElement(parseOption()); break;
-                case RIGHT_PAREN, RIGHT_BRACE, SELECT_CLOSE: break;
+                case SELECT_OPEN: currentElement().addElement(parseOption()); break;
+                case GROUP_CLOSE, MULTIPLE_CLOSE, SELECT_CLOSE: break;
             }
+
             // consume separator if present
             if (index < tokens.size() && peekToken().type == TokenType.OPTION) {
                 nextToken();

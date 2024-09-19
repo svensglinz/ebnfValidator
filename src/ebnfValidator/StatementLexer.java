@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * DESCRIPTION
+ * Tokenizes a statement into different tokens (literals) given the set of possible
+ * literals that occur in the Grammar Rules.
  */
 
 class StatementLexer {
@@ -17,27 +18,17 @@ class StatementLexer {
 
     public StatementLexer(String statement, Set<Token> EBNFTokens) {
         this.statement = statement;
-        this.EBNFTokens = extractLiterals(EBNFTokens);
-    }
-
-    private Set<Token> extractLiterals(Set<Token> EBNFTokens) {
-        Set<Token> literals = new HashSet<>();
-        for (Token t : EBNFTokens) {
-            if (t.type == TokenType.LITERAL) {
-                literals.add(t);
-            }
-        }
-        return literals;
+        this.EBNFTokens = EBNFTokens;
     }
 
     void scanToken() {
-
         // skip whitespace
         while (statement.charAt(index) == ' ') {
             index++;
         }
 
         // scanner ignores whitespace but two rules separated by whitespace can never be one
+        // find longest word that matches a token in the set of allowed tokens
         Token match = new Token("", TokenType.EMPTY);
         for (Token t : EBNFTokens) {
             if (statement.startsWith(t.value, index)) {
