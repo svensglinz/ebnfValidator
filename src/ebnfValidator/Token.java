@@ -10,7 +10,6 @@ class Token {
     }
 
     public Token(TokenType type) {
-        this.value = null;
         this.type = type;
     }
 

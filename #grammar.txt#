@@ -4,3 +4,4 @@
 <term_or_literal> <= <term> | <literal>
 <assignment_op> <= = | "<-"
 <sign> <=  - | +
+<rule> <= test

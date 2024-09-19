@@ -25,9 +25,9 @@ class EBNFParser {
         int target;
         switch (current.type) {
             case LEFT_BRACE -> target = nextPosition(RIGHT_BRACE) + 1;
-            case LEFT_BRACKET -> target = nextPosition(RIGHT_BRACKET) + 1;
+            case LEFT_BRACKET -> target = nextPosition(SELECT_CLOSE) + 1;
             case LEFT_PAREN -> target = nextPosition(RIGHT_PAREN) + 1;
-            case RIGHT_BRACE, RIGHT_BRACKET, RIGHT_PAREN -> {
+            case RIGHT_BRACE, SELECT_CLOSE, RIGHT_PAREN -> {
                 return false;
             }
             default -> target = index + 1;
@@ -99,7 +99,7 @@ class EBNFParser {
                 } break;
                 case LEFT_BRACKET: currentElement().addElement(parseOption()); break;
                 case SEP: {} continue;
-                case RIGHT_PAREN, RIGHT_BRACE, RIGHT_BRACKET: {
+                case RIGHT_PAREN, RIGHT_BRACE, SELECT_CLOSE: {
                     elementStack.pop();
                     return group;
                 }
@@ -136,7 +136,7 @@ class EBNFParser {
                     currentElement().addElement(e);
                 } break;
                 case LEFT_BRACKET: currentElement().addElement(parseOption()); break;
-                case RIGHT_PAREN, RIGHT_BRACE, RIGHT_BRACKET: break;
+                case RIGHT_PAREN, RIGHT_BRACE, SELECT_CLOSE: break;
             }
             // consume separator if present
             if (index < tokens.size() && peekToken().type == TokenType.SEP) {

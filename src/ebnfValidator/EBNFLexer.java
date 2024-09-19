@@ -3,8 +3,6 @@ package ebnfValidator;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ebnfValidator.TokenType.*;
-
 /**
  * Lexer classifies an ebnfValidator.EBNF rule into its rules, which are the special elements {}()| as well
  * as rule names and terminal values (literals)
@@ -66,7 +64,7 @@ class EBNFLexer {
                 addToken(new Token(TokenType.LEFT_BRACKET));
                 break;
             case ']':
-                addToken(new Token(TokenType.RIGHT_BRACKET));
+                addToken(new Token(TokenType.SELECT_CLOSE));
                 break;
             case '|':
                 addToken(new Token(TokenType.SEP));
