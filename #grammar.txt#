@@ -1,7 +1,0 @@
-<expression> <= { <literal> } { <term> } <assignment_op> [ <sign> ] { <term> }
-<literal> <= a | b | c | d
-<term> <=  0 | 1 | 2 | 3 | 4
-<term_or_literal> <= <term> | <literal>
-<assignment_op> <= = | "<-"
-<sign> <=  - | +
-<rule> <= test
