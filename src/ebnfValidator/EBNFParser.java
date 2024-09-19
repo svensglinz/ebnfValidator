@@ -33,7 +33,7 @@ class EBNFParser {
             default -> target = index + 1;
         }
         if (target > 0 && target < tokens.size() - 1) {
-            return tokens.get(target).type == TokenType.SEP;
+            return tokens.get(target).type == TokenType.OPTION;
         }
         return false;
     }
@@ -98,7 +98,7 @@ class EBNFParser {
                     currentElement().addElement(e);
                 } break;
                 case LEFT_BRACKET: currentElement().addElement(parseOption()); break;
-                case SEP: {} continue;
+                case OPTION: {} continue;
                 case RIGHT_PAREN, RIGHT_BRACE, SELECT_CLOSE: {
                     elementStack.pop();
                     return group;
@@ -113,7 +113,7 @@ class EBNFParser {
     // checks if the previous element was a selector
     private boolean prevSelect() {
         if (index - 1 >= 0) {
-            return tokens.get(index - 1).type == TokenType.SEP;
+            return tokens.get(index - 1).type == TokenType.OPTION;
         } else
             return false;
     }
@@ -139,7 +139,7 @@ class EBNFParser {
                 case RIGHT_PAREN, RIGHT_BRACE, SELECT_CLOSE: break;
             }
             // consume separator if present
-            if (index < tokens.size() && peekToken().type == TokenType.SEP) {
+            if (index < tokens.size() && peekToken().type == TokenType.OPTION) {
                 nextToken();
             }
         } while (hasNextToken() && prevSelect());

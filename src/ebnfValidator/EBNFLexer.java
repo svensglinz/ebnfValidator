@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Lexer classifies an ebnfValidator.EBNF rule into its rules, which are the special elements {}()| as well
- * as rule names and terminal values (literals)
+ * Tokenizes an EBNF rule into its special elements as defined in TokenTypes
  */
 
 // ebnfValidator.EBNF LEXER
@@ -49,30 +48,30 @@ class EBNFLexer {
         char c = advance();
         switch (c) {
             case '(':
-                addToken(new Token(TokenType.LEFT_PAREN));
+                addToken(new Token(TokenType.GROUP_OPEN));
                 break;
             case ')':
-                addToken(new Token(TokenType.RIGHT_PAREN));
+                addToken(new Token(TokenType.GROUP_CLOSE));
                 break;
             case '{':
-                addToken(new Token(TokenType.LEFT_BRACE));
+                addToken(new Token(TokenType.MULTIPLE_OPEN));
                 break;
             case '}':
-                addToken(new Token(TokenType.RIGHT_BRACE));
+                addToken(new Token(TokenType.MULTIPLE_CLOSE));
                 break;
             case '[':
-                addToken(new Token(TokenType.LEFT_BRACKET));
+                addToken(new Token(TokenType.SELECT_OPEN));
                 break;
             case ']':
                 addToken(new Token(TokenType.SELECT_CLOSE));
                 break;
             case '|':
-                addToken(new Token(TokenType.SEP));
+                addToken(new Token(TokenType.OPTION));
                 break;
-            case ' ':
+            case ' ': // skip whitespace
                 break;
             case '"':
-                addSpecialLiteral();
+                addSpecialLiteral(); // literals []{}()|
                 break;
             case '<':
                 addRule();
@@ -94,6 +93,7 @@ class EBNFLexer {
             throw new IllegalArgumentException("No closing \" detected");
         }
 
+        // empty string
         if (index == start)
             addToken(new Token("", TokenType.EMPTY));
         else
