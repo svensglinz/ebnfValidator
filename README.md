@@ -12,14 +12,14 @@ For more context and background, see [here](https://svenglinz.ovh/post.php?id=18
 
 ## Installation
 ```bash
-> mkdir $HOME/ebnfValidator
-> curl https://raw.githubusercontent.com/svensglinz/ebnfValidator/master/ebnfValidator.jar > $HOME/ebnfValidator/ebnfValidator.jar
+mkdir $HOME/ebnfValidator
+curl https://raw.githubusercontent.com/svensglinz/ebnfValidator/master/ebnfValidator.jar > $HOME/ebnfValidator/ebnfValidator.jar
 # echo "alias ebnfValidator='java -jar $HOME/ebnfValidator/ebnfValidator.jar' >> ~/.bashrc
 ```
 
 ## Uninstall
 ```bash
-> rm -r $HOME/ebnfValidator
+rm -r $HOME/ebnfValidator
 # remove alias from ~/.bashrc if it was set
 ```
 
@@ -48,29 +48,29 @@ For an example, see [here](grammar.txt)
 Then evaluate any expression against your grammar in the interactive shell
 
 ```bash
-> ebnfValidator grammar.txt
+ebnfValidator grammar.txt
 ```
 > Welcome to the Interactive Shell! </code>
 Type in any expression and check if matches against the provided ebnfValidator.Grammar Description
 Type '.exit' to quit at any time.
 
 ```bash
-> a = 100
+a = 100
 ```
 > ✔️ valid
 
 ```bash
-> b <- 123
+b <- 123
 ```
 > ✔️ valid
 
 ```bash
-> b == 123
+b == 123
 ```
 > :x: invalid
 
 ```bash
-> .exit
+.exit
 ```
 
 > Goodbye!
