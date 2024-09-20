@@ -6,7 +6,7 @@ The parser uses a top-down approach and evaluates all possible productions.
 The syntax for EBNF grammar is adjusted to correspond to the one used in the course **Introduction to Programming** at ETH Zurich. 
 
 As the parser could get trapped in infinite recursion, the search for a valid production is stopped after a maximum level of depth, which can lead 
-to incorrect results for extremely nested productions. 
+to incorrect results for heavily nested productions. 
 
 For more context and background, see [here](https://svenglinz.ovh/post.php?id=18)
 
