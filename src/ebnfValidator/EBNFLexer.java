@@ -47,37 +47,18 @@ class EBNFLexer {
     private void scanToken() {
         char c = advance();
         switch (c) {
-            case '(':
-                addToken(new Token(TokenType.GROUP_OPEN));
-                break;
-            case ')':
-                addToken(new Token(TokenType.GROUP_CLOSE));
-                break;
-            case '{':
-                addToken(new Token(TokenType.MULTIPLE_OPEN));
-                break;
-            case '}':
-                addToken(new Token(TokenType.MULTIPLE_CLOSE));
-                break;
-            case '[':
-                addToken(new Token(TokenType.OPTION_OPEN));
-                break;
-            case ']':
-                addToken(new Token(TokenType.OPTION_CLOSE));
-                break;
-            case '|':
-                addToken(new Token(TokenType.SELECT));
-                break;
-            case ' ': // skip whitespace
-                break;
-            case '"':
-                addSpecialLiteral(); // literals []{}()|
-                break;
-            case '<':
-                addRule();
-                break;
-            default:
-                addLiteral();
+            case '(' -> addToken(new Token(TokenType.GROUP_OPEN));
+            case ')' -> addToken(new Token(TokenType.GROUP_CLOSE));
+            case '{' -> addToken(new Token(TokenType.MULTIPLE_OPEN));
+            case '}' -> addToken(new Token(TokenType.MULTIPLE_CLOSE));
+            case '[' -> addToken(new Token(TokenType.OPTION_OPEN));
+            case ']' -> addToken(new Token(TokenType.OPTION_CLOSE));
+            case '|' -> addToken(new Token(TokenType.SELECT));
+            case ' ' -> {
+            }// skip whitespace
+            case '"' -> addSpecialLiteral(); // literals []{}()|
+            case '<' -> addRule();
+            default -> addLiteral();
         }
     }
 
