@@ -1,10 +1,16 @@
 # ebnfValidator 
-A brute force parser for any kind of ebnfValidator.EBNF grammar that validates whether a partiular code snippet is syntactically valid or not. 
-The parser uses a top-down approach and evaluates all possible productions 
 
-For more context, see [here](https://svenglinz.ovh/post.php?id=18)
+A brute force parser for any kind of EBNF grammar that validates whether a partiular code snippet is syntactically valid or not. 
+The parser uses a top-down approach and evaluates all possible productions. 
 
-## Install
+The syntax for EBNF grammar is adjusted to correspond to the one used in the course **Introduction to Programming** at ETH Zurich. 
+
+As the parser could get trapped in infinite recursion, the search for a valid production is stopped after a maximum level of depth, which can lead 
+to incorrect results for extremely nested productions. 
+
+For more context and background, see [here](https://svenglinz.ovh/post.php?id=18)
+
+## Installation
 ```bash
 > mkdir $HOME/ebnfValidator
 > curl https://raw.githubusercontent.com/svensglinz/ebnfValidator/master/ebnfValidator.jar > $HOME/ebnfValidator/ebnfValidator.jar
@@ -14,18 +20,32 @@ For more context, see [here](https://svenglinz.ovh/post.php?id=18)
 ## Uninstall
 ```bash
 > rm -r $HOME/ebnfValidator
-# optionally remove alias
+# remove alias from ~/.bashrc if it was set
 ```
 
 ## Usage 
 
-Create a text file that describes your grammar.
+First, create a text file that describes your grammar.
+
 - Each rule name must be wrapped in <>
 - Each line consists of one rule in the form of <RULENAME> <= RULE DESCRIPTION
 - each description can contain: literals, repetition {}, option [] or selection |
-- todo: precedence description
+- selection has the highest precedence before all other operators
+eg: <RULE1> <= a <RULE1> | b is parsed as <RULE1> <= (a <RULE1> ) | b (ie. as a selection between a AND <RULE1> or b
+
+LIMITATIONS: 
+
+- literals (eg. b in the following) can only be added individually
+Eg. If you want a grammar such as *<STRING> <= {<CHARACTER>}* where *<CHARACTER>* can be any letter in the alphabet,
+you will have to list each letter separately ie:
+<CHARACTER> <= a | b | c | ... | z
+
+- Invalid grammar descriptions (ie. wrong syntax) will likely just evaluate to "invalid" when checked against an expression as there is no robust 
+syntax checking and error reporting. 
 
 For an example, see [here](grammar.txt)
+
+---
 
 Then evaluate any expression against your grammar in the interactive shell
 
@@ -50,3 +70,9 @@ Type '.exit' to quit at any time.
 > b == 123
 ```
 > :x: invalid
+
+```bash
+> .exit
+```
+
+> Goodbye!
