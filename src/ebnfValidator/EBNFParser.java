@@ -30,8 +30,6 @@ class EBNFParser {
     }
 
     Expression parseExpression() {
-        // adding the new expression here does not work. THey need to be created within the groups, multiples ETC !!! !!! !!!
-        // only these give an actually new expression
         Expression expression = new Expression();
         while (idx < tokens.size()) {
             Token next = tokens.get(idx);
