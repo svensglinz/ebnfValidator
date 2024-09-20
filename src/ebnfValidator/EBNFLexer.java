@@ -60,13 +60,13 @@ class EBNFLexer {
                 addToken(new Token(TokenType.MULTIPLE_CLOSE));
                 break;
             case '[':
-                addToken(new Token(TokenType.SELECT_OPEN));
+                addToken(new Token(TokenType.OPTION_OPEN));
                 break;
             case ']':
-                addToken(new Token(TokenType.SELECT_CLOSE));
+                addToken(new Token(TokenType.OPTION_CLOSE));
                 break;
             case '|':
-                addToken(new Token(TokenType.OPTION));
+                addToken(new Token(TokenType.SELECT));
                 break;
             case ' ': // skip whitespace
                 break;

@@ -14,7 +14,7 @@ public class GrammarValidator {
     private int depth = 0;
     public final int MAX_STACK_DEPTH = 30;
     Grammar grammar;
-    Map<String, GrammarElement> rules;
+    Map<String, Expression> rules;
     List<Token> tokens;
 
     public GrammarValidator(Grammar grammar) {
@@ -22,136 +22,114 @@ public class GrammarValidator {
         rules = grammar.parsedRules;
     }
 
-    // evaluate a ebnfValidator.Grammar Element
-    private Set<Integer> evaluate(GrammarElement elem, Set<Integer> indexSet) {
-        // any production may at most make MAX_STACK_DEPTH calls to evaluate
-        depth++;
-        try {
-            // no need to traverse tree
-            if (indexSet.isEmpty()) {
-                return indexSet;
-            }
+    // try to match this expression against the input
+    private Set<Integer> evaluateExpression(Expression expression, Set<Integer> indexSet) {
 
-            // trying to prevent infinite recursion
+        depth++;
+
+        try {
+
             if (depth > MAX_STACK_DEPTH) {
                 return Set.of();
             }
 
-            if (elem instanceof Expression) {
-                return evaluateExpression((Expression) elem, indexSet);
-            } else if (elem instanceof Node) {
-                return evaluateNode((Node) elem, indexSet);
+            Set<Integer> reachedIdxSet = null;
+
+            // expression consists of different options --> only one must be fulfilled
+            if (isSelect(expression)) {
+                reachedIdxSet = new HashSet<>();
+                for (Term term : expression.terms) {
+                    reachedIdxSet.addAll(evaluateTerm(term, indexSet));
+                }
+                return reachedIdxSet;
             }
-            return Set.of();
+
+            // expression consists of an expression where all terms must be fulfilled
+            for (Term term : expression.terms) {
+                if (reachedIdxSet == null)
+                    reachedIdxSet = evaluateTerm(term, indexSet);
+                else
+                    reachedIdxSet = evaluateTerm(term, reachedIdxSet);
+            }
+            return reachedIdxSet;
+
         } finally {
             depth--;
         }
+
     }
 
-    // checks if any is true
-    private Set<Integer> evaluateSelect(GrammarElement expression, Set<Integer> indexSet) {
-
-        Set<Integer> reachedIndices = new HashSet<>();
-        for (GrammarElement expr : expression.elements) {
-            Set<Integer> reached = evaluate(expr, indexSet);
-            if (!reached.isEmpty()) {
-                reachedIndices.addAll(reached);
-            }
+    private boolean isSelect(Expression expression) {
+        if (expression.terms == null)
+            return false;
+        for (Term term : expression.terms) {
+            if (!(term instanceof Select))
+                return false;
         }
-        return reachedIndices;
-
+        return true;
     }
 
-    // checks if all are true
-    private Set<Integer> evaluateGroup(Expression expr, Set<Integer> indexSet) {
-
-        Set<Integer> reachedIndices = null;
-        for (GrammarElement elem : expr.elements) {
-            if (reachedIndices == null)
-                reachedIndices = evaluate(elem, indexSet);
-            else {
-                reachedIndices = evaluate(elem, reachedIndices);
-            }
-
-            // early exit
-            if (reachedIndices.isEmpty()) {
-                break;
-            }
-        }
-        return reachedIndices == null ? Set.of() : reachedIndices;
-
+    private Set<Integer> evaluateTerm(Term term, Set<Integer> indexSet) {
+        return switch (term) {
+            case Option o -> evaluateOption(o, indexSet);
+            case Multiple m -> evaluateMultiple(m, indexSet);
+            case Group g -> evaluateGroup(g, indexSet);
+            case Terminal t -> evaluateTerminal(t, indexSet);
+            case Rule r -> evaluateRule(r, indexSet);
+            case Select s -> evaluateSelect(s, indexSet);
+            default -> throw new IllegalStateException("Unexpected value: " + term);
+        };
     }
 
-    private Set<Integer> evaluateMultiple(Expression expr, Set<Integer> indexSet) {
-
-        // assume Multiple can also be executed 0 times. if > 1, remove indexSet from initializer
-        Set<Integer> reachedIndices = new HashSet<>(indexSet);
+    private Set<Integer> evaluateMultiple(Multiple m, Set<Integer> indexSet) {
+        Set<Integer> reachedIdxSet = new HashSet<>(indexSet);
         Set<Integer> curIndices = indexSet;
+
         do {
-            // multiple can contain exactly one group as a child
-            curIndices = evaluate(expr.elements.getFirst(), curIndices);
-            reachedIndices.addAll(curIndices);
+            curIndices = evaluateExpression(m.expression, curIndices);
+            reachedIdxSet.addAll(curIndices);
         } while (!curIndices.isEmpty());
-        return reachedIndices;
-
+        return reachedIdxSet;
     }
 
-    private Set<Integer> evaluateOption(Expression expr, Set<Integer> indexSet) {
-        // reached by not evaluating
-        Set<Integer> reachedIndices = new HashSet<>(indexSet);
-        // option must contain exactly one group as a child
-        reachedIndices.addAll(evaluate(expr.elements.getFirst(), indexSet));
-        return reachedIndices;
+    private Set<Integer> evaluateGroup(Group g, Set<Integer> indexSet) {
+        return evaluateExpression(g.expression, indexSet);
     }
 
-    private Set<Integer> evaluateNode(Node node, Set<Integer> indexSet) {
-        if (node.isTerminal()) {
-            return evaluateTerminal(node, indexSet);
-        } else {
-            return evaluateNonTerminal(node, indexSet);
-        }
+    private Set<Integer> evaluateSelect(Select s, Set<Integer> indexSet) {
+        return evaluateExpression(s.expression, indexSet);
     }
 
-    private Set<Integer> evaluateNonTerminal(Node node, Set<Integer> indexSet) {
-        return evaluate(getRule(node.token.value), indexSet);
+    private Set<Integer> evaluateOption(Option o, Set<Integer> indexSet) {
+        Set<Integer> reachedIdxSet = new HashSet<>(indexSet);
+        reachedIdxSet.addAll(evaluateExpression(o.expression, indexSet));
+        return reachedIdxSet;
     }
 
-    private GrammarElement getRule(String ruleName) {
-        return rules.get(ruleName);
-    }
-
-    private Set<Integer> evaluateTerminal(Node node, Set<Integer> indexSet) {
+    private Set<Integer> evaluateTerminal(Terminal t, Set<Integer> indexSet) {
 
         Set<Integer> matched = new HashSet<>();
         for (Integer index : indexSet) {
-            if (matchToken(node.token.value, index)) {
+            if (matchTerminal(t, index)) {
                 matched.add(index + 1);
             }
         }
         return matched;
     }
 
+    private Set<Integer> evaluateRule (Rule r, Set<Integer> indexSet) {
+        Expression e = rules.get(r.value);
+        return evaluateExpression(e, indexSet);
+    }
+
     // check if token matches the next token!
-    private boolean matchToken(String token, int index) {
+    private boolean matchTerminal(Terminal t, int index) {
         if (index >= tokens.size()) {
             return false;
         }
-        return tokens.get(index).value.equals(token);
+        return tokens.get(index).value.equals(t.value);
     }
 
-    // try to match this expression against the input
-    private Set<Integer> evaluateExpression(Expression expression, Set<Integer> indexSet) {
-
-        return switch (expression.type) {
-            case "group" -> evaluateGroup(expression, indexSet);
-            case "multiple" -> evaluateMultiple(expression, indexSet);
-            case "select" -> evaluateSelect(expression, indexSet);
-            case "option" -> evaluateOption(expression, indexSet);
-            default -> Set.of();
-        };
-
-
-    }
 
     // assumes that EXPRESSION rule is entry point into grammar
     public boolean isValid(String expression) {
@@ -164,6 +142,6 @@ public class GrammarValidator {
         } catch (IllegalArgumentException e) {
             return false;
         }
-        return evaluate(getRule("expression"), Set.of(0)).contains(tokens.size());
+        return evaluateExpression(rules.get("expression"), Set.of(0)).contains(tokens.size());
     }
 }

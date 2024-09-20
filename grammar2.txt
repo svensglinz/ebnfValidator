@@ -1,0 +1,8 @@
+<arithmetic_op> <= + | * | - | /
+<arithmetic_expression> <= "(" <arithmetic_expression> ")" | <identifier> <arithmetic_op> <identifier> | <identifier>
+<expression> <= <assignment_expression> | <arithmetic_expression>
+<element_select> <= "[" <expression> "]"
+<assignment_operator> <= = | +=
+<scalar_or_element> <= <identifier> | <identifier> { <element_select> }
+<assignment_expression> <= <scalar_or_element> <assignment_operator> <expression>
+<identifier> <= 2 |  1 | x | a | y | b | z | j | i | c | v | p | q | r

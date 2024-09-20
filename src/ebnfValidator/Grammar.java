@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Scanner;
+
+import ebnfValidator.EBNFParser.*;
 /**
  * Utility class that reads a grammar description and returns each line in an array list
  * for further processing
@@ -16,12 +18,12 @@ import java.util.Scanner;
 public class Grammar {
     Map<String, String> unparsedRules;
     Map<String, List<Token>> tokenizedRules;
-    Map<String, GrammarElement> parsedRules;
+    Map<String, Expression> parsedRules;
     Set<Token> literals;
     GrammarValidator validator;
 
     public Grammar(String fileName) throws FileNotFoundException {
-        // process Grammar step by step
+        // process Grammar step by steps
         unparsedRules = readRules(fileName);
         tokenizedRules = tokenizeRules(unparsedRules);
         parsedRules = parseRules(tokenizedRules);
@@ -59,6 +61,9 @@ public class Grammar {
             if (args.length != 2) {
                 System.err.println("Error in line " + lineNr + ": " + line);
             }
+
+            args[0] = args[0].trim();
+            args[0] = args[0].substring(1, args[0].length() - 1);
             // add rule name as key, rule description as value
             rules.put(args[0].trim(), args[1].trim());
         }
@@ -66,8 +71,8 @@ public class Grammar {
     }
 
     // turns a tokenized rule into a parsed rule that is represented by a tree of GrammarElement objects
-    private Map<String, GrammarElement> parseRules(Map<String, List<Token>> tokenizedRules) {
-        Map<String, GrammarElement> parsedRules = new HashMap<>();
+    private Map<String, Expression> parseRules(Map<String, List<Token>> tokenizedRules) {
+        Map<String, Expression> parsedRules = new HashMap<>();
         for (Map.Entry<String, List<Token>> rule : tokenizedRules.entrySet()) {
             EBNFParser parser = new EBNFParser(rule.getValue());
             parsedRules.put(rule.getKey(), parser.parse());

@@ -16,7 +16,7 @@ public class EBNF {
         interactive(grammar);
     }
 
-    private static Grammar loadGrammar(String path) {
+    public static Grammar loadGrammar(String path) {
         Grammar grammar = null;
         try {
             grammar = new Grammar(path);

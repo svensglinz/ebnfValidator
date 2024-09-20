@@ -1,7 +1,7 @@
 package ebnfValidator;
 
-import java.util.Stack;
 import java.util.List;
+import java.util.Stack;
 
 import static ebnfValidator.TokenType.*;
 
@@ -9,162 +9,143 @@ import static ebnfValidator.TokenType.*;
  * parses a single body of a rule
  */
 class EBNFParser {
-    private final Stack<GrammarElement> elementStack = new Stack<>();
     List<Token> tokens;
-    GrammarElement rootElem = new Expression("group");
-    int index = 0;
+    int idx = 0;
 
-    public EBNFParser(List<Token> tokens){
+    public EBNFParser(List<Token> tokens) {
         this.tokens = tokens;
-        elementStack.push(rootElem);
     }
 
-    // checks if the next parsing block is separated by a selector
-    private boolean isNextSelect() {
-        Token current = peekToken();
-        int target;
-        switch (current.type) {
-            case SELECT_OPEN -> target = nextPosition(SELECT_CLOSE) + 1;
-            case GROUP_OPEN -> target = nextPosition(GROUP_CLOSE) + 1;
-            case MULTIPLE_OPEN -> target = nextPosition(MULTIPLE_CLOSE) + 1;
-            case GROUP_CLOSE, SELECT_CLOSE, MULTIPLE_CLOSE -> {
-                return false;
-            }
-            default -> target = index + 1;
+    private void consumeToken(TokenType expected) {
+        Token cur = tokens.get(idx);
+        if (cur.type.equals(expected)) {
+            idx++;
+        } else {
+            throw new IllegalArgumentException("Unexpected token: " + expected);
         }
-        if (target > 0 && target < tokens.size() - 1) {
-            return tokens.get(target).type == TokenType.OPTION;
-        }
-        return false;
     }
 
-    // returns whether previous statement was select
-    private boolean isPreviousSelect() {
-        return false;
-    }
-    // returns the next position where the tokenType is equal to `type`
-    private int nextPosition(TokenType type) {
-        for (int i = index; i < tokens.size(); i++) {
-            if (tokens.get(i).type == type) {
-                return i;
-            }
-        }
-        return -1;
+    private Token advance() {
+        return tokens.get(idx++);
     }
 
-    private Token nextToken() {
-        return tokens.get(index++);
-    }
-
-    private Token peekToken() {
-        return tokens.get(index);
-    }
-
-    // return the top element on the stack
-    private GrammarElement currentElement() {
-        return elementStack.peek();
-    }
-
-    private boolean hasNextToken() {
-        return index < tokens.size();
-    }
-
-    private GrammarElement parseGroup() {
-
-        GrammarElement group = new Expression("group");
-        elementStack.push(group);
-
-        while (hasNextToken()) {
-
-            // if current group ends with a selector --> add a select element
-            if (isNextSelect()) {
-                GrammarElement e = parseSelect();
-                currentElement().addElement(e);
-            }
-
-            // extremely messy. make this more readable !!!
-            Token token;
-            if (hasNextToken())
-                token = nextToken();
-            else
-                return group;
-
-            switch (token.type) {
-
-                case RULE, LITERAL: currentElement().addElement(new Node(token)); break;
-                case GROUP_OPEN: currentElement().addElement(parseGroup()); break;
-                case MULTIPLE_OPEN: {
-                    GrammarElement e = parseMultiple();
-                    currentElement().addElement(e);
-                } break;
-                case SELECT_OPEN: currentElement().addElement(parseOption()); break;
-                case OPTION: {} continue;
-                case GROUP_CLOSE, MULTIPLE_CLOSE, SELECT_CLOSE: {
-                    elementStack.pop();
-                    return group;
+    Expression parseExpression() {
+        // adding the new expression here does not work. THey need to be created within the groups, multiples ETC !!! !!! !!!
+        // only these give an actually new expression
+        Expression expression = new Expression();
+        while (idx < tokens.size()) {
+            Token next = tokens.get(idx);
+            switch (next.type) {
+                case SELECT_OPEN -> expression.add(parseSelect());
+                case LITERAL -> expression.add(new Terminal(advance().value));
+                case GROUP_OPEN -> expression.add(parseGroup());
+                case MULTIPLE_OPEN -> expression.add(parseMultiple());
+                case OPTION_OPEN -> expression.add(parseOption());
+                case RULE -> expression.add(new Rule(advance().value));
+                default -> {
+                    return expression;
                 }
             }
         }
-        // closing tags
-        elementStack.pop();
-        return group;
+        return expression;
     }
 
-    // checks if the previous element was a selector
-    private boolean prevSelect() {
-        if (index - 1 >= 0) {
-            return tokens.get(index - 1).type == TokenType.OPTION;
-        } else
-            return false;
+    Expression parse() {
+        preprocessSelect(tokens);
+        return parseExpression();
     }
 
-    private GrammarElement parseSelect() {
-        GrammarElement select = new Expression("select");
-        elementStack.push(select);
+    private Select parseSelect() {
+        consumeToken(SELECT_OPEN);
+        Expression expression = parseExpression();
+        consumeToken(SELECT_CLOSE);
+        return new Select(expression);
+    }
 
-        // add groups to the current selection expression
-        do {
-            Token token = nextToken();
-            switch (token.type) {
-                case RULE, LITERAL: currentElement().addElement(new Node(token)); break;
-                case GROUP_OPEN: {
-                    GrammarElement g = parseGroup();
-                    currentElement().addElement(g);
-                } break;
-                case MULTIPLE_OPEN: {
-                    GrammarElement e = parseMultiple();
-                    currentElement().addElement(e);
-                } break;
-                case SELECT_OPEN: currentElement().addElement(parseOption()); break;
-                case GROUP_CLOSE, MULTIPLE_CLOSE, SELECT_CLOSE: break;
+    private Group parseGroup() {
+        consumeToken(GROUP_OPEN);
+        Expression expression = parseExpression();
+        consumeToken(GROUP_CLOSE);
+        return new Group(expression);
+    }
+
+    private Multiple parseMultiple() {
+        consumeToken(MULTIPLE_OPEN);
+        Expression expression = parseExpression();
+        consumeToken(MULTIPLE_CLOSE);
+        return new Multiple(expression);
+    }
+
+    private Option parseOption() {
+        consumeToken(OPTION_OPEN);
+        Expression expression = parseExpression();
+        consumeToken(OPTION_CLOSE);
+        return new Option(expression);
+    }
+
+    private void preprocessSelect(List<Token> tokens) {
+        Stack<Integer> startIndex = new Stack<>();
+
+        for (int i = 0; i < tokens.size(); i++) {
+            Token t = tokens.get(i);
+            if (isOpen(t)) {
+                startIndex.push(i);
+            } else if (isClose(t)) {
+                int sizeOld = tokens.size();
+                int start = startIndex.pop();
+
+                // if block is enclosed brackets, process only inner part
+                if (isOpen(tokens.get(start)) && isClose(tokens.get(i)))
+                    preprocessBlock(start + 1, i - 1);
+                else
+                    preprocessBlock(start, i);
+                // advance index to new end position
+                i += tokens.size() - sizeOld;
             }
+        }
+        // process entire expression
+        preprocessBlock(0, tokens.size() - 1);
+    }
 
-            // consume separator if present
-            if (index < tokens.size() && peekToken().type == TokenType.OPTION) {
-                nextToken();
+    private boolean isRuleOrLiteral(int i) {
+        TokenType t = tokens.get(i).type;
+        return t.equals(LITERAL) || t.equals(RULE);
+    }
+
+    private void preprocessBlock(int start, int end) {
+        int countOpen = 0;
+        boolean hasSelect = false;
+        for (int i = start; i <= end; i++) {
+
+            Token t = tokens.get(i);
+            if (isOpen(t))
+                countOpen++;
+            else if (isClose(t))
+                countOpen--;
+            else if (t.type.equals(SELECT) && countOpen == 0) {
+                hasSelect = true;
+                tokens.remove(i);
+                tokens.add(i, new Token(SELECT_CLOSE));
+                tokens.add(i + 1, new Token(SELECT_OPEN));
+
+                // added 1 more token
+                end++;
+                i++;
             }
-        } while (hasNextToken() && prevSelect());
-        elementStack.pop();
-        return select;
+        }
+
+        // opening and closing select of block
+        if (hasSelect) {
+            tokens.add(start, new Token(SELECT_OPEN));
+            tokens.add(end + 2, new Token(SELECT_CLOSE));
+        }
     }
 
-    private GrammarElement parseOption(){
-        GrammarElement option = new Expression("option");
-        option.addElement(parseGroup());
-        return option;
+    private boolean isOpen(Token token) {
+        return token.type.equals(GROUP_OPEN) || token.type.equals(OPTION_OPEN) || token.type.equals(MULTIPLE_OPEN);
     }
 
-    private GrammarElement parseMultiple() {
-        GrammarElement multiple = new Expression("multiple");
-        elementStack.push(multiple);
-        GrammarElement group = parseGroup();
-        multiple.addElement(group);
-        elementStack.pop();
-        return multiple;
-    }
-
-    // top element of any rule is always a group
-    public GrammarElement parse() {
-        return parseGroup();
+    private boolean isClose(Token token) {
+        return token.type.equals(GROUP_CLOSE) || token.type.equals(OPTION_CLOSE) || token.type.equals(MULTIPLE_CLOSE);
     }
 }
