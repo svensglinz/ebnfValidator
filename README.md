@@ -31,7 +31,7 @@ First, create a text file that describes your grammar.
 - Each line consists of one rule in the form of <RULENAME> <= RULE DESCRIPTION
 - each description can contain: literals, repetition {}, option [] or selection |
 - selection has the highest precedence before all other operators
-- The entry point into the grammar is always a rule called *<expression>*. If you do not have this rule ( or it is not the top-level rule), the results will be incorrect
+- The entry point into the grammar is always a rule called **expression**. If you do not have this rule ( or it is not the top-level rule), the results will be incorrect
 eg: <RULE1> <= a <RULE1> | b is parsed as <RULE1> <= (a <RULE1> ) | b (ie. as a selection between a AND <RULE1> or b
 
 LIMITATIONS: 
