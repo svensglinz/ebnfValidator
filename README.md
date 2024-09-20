@@ -45,8 +45,6 @@ syntax checking and error reporting.
 
 For an example, see [here](grammar.txt)
 
----
-
 Then evaluate any expression against your grammar in the interactive shell
 
 ```bash
