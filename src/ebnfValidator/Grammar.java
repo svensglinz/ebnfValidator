@@ -56,14 +56,18 @@ public class Grammar {
             // replace excess whitespace
             line = line.replaceAll("\\s+", " ");
 
-            String[] args = line.split("<=");
+            // get first "<=" and split into rule name and body
+            int pos = line.indexOf("<=");
 
-            if (args.length != 2) {
+            if (pos < 0) {
                 System.err.println("Error in line " + lineNr + ": " + line);
+
             }
 
+            String[] args = {line.substring(0, pos), line.substring(pos + 2)};
             args[0] = args[0].trim();
             args[0] = args[0].substring(1, args[0].length() - 1);
+
             // add rule name as key, rule description as value
             rules.put(args[0].trim(), args[1].trim());
         }

@@ -12,7 +12,7 @@ import java.util.HashSet;
 
 public class GrammarValidator {
     private int depth = 0;
-    public final int MAX_STACK_DEPTH = 30;
+    public final int MAX_STACK_DEPTH = 25;
     Grammar grammar;
     Map<String, Expression> rules;
     List<Token> tokens;
