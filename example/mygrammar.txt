@@ -1,0 +1,4 @@
+<expression> <= [ <sign> ] { <number> } <letter>
+<sign> <= + | -
+<number> <= 1 | 2 | 3 
+<letter> <= a | b | c
