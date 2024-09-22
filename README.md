@@ -30,21 +30,19 @@ First, create a text file that describes your grammar.
 - Each rule name must be wrapped in <>
 - Each line consists of one rule in the form of <RULENAME> <= RULE DESCRIPTION
 - each description can contain: literals, repetition {}, option [] or selection |
-- selection has the highest precedence before all other operators
+- selection has the highest precedence before all other operators <br> <br>
+ *eg: \<RULE1> <= a \<RULE1> | b is parsed as \<RULE1> <= (a \<RULE1> ) | b (ie. as a selection between a AND <RULE1> or b*
 - The entry point into the grammar is always a rule called **expression**. If you do not have this rule ( or it is not the top-level rule), the results will be incorrect
-eg: <RULE1> <= a <RULE1> | b is parsed as <RULE1> <= (a <RULE1> ) | b (ie. as a selection between a AND <RULE1> or b
+
 
 LIMITATIONS: 
 
-- literals (eg. b in the following) can only be added individually
-Eg. If you want a grammar such as *<STRING> <= {<CHARACTER>}* where *<CHARACTER>* can be any letter in the alphabet,
+- literals (eg. b in the following) can only be added individually <br> <br>
+*Eg. If you want a grammar such as *\<STRING> <= {\<CHARACTER>}* where *\<CHARACTER>* can be any letter in the alphabet,
 you will have to list each letter separately ie:
-<CHARACTER> <= a | b | c | ... | z
+\<CHARACTER> <= a | b | c | ... | z*
 
-- Invalid grammar descriptions (ie. wrong syntax) will likely just evaluate to "invalid" when checked against an expression as there is no robust 
-syntax checking and error reporting. 
-
-For an example, see [here](grammar.txt)
+For an example, see [here](/example/grammar.txt)
 
 Then evaluate any expression against your grammar in the interactive shell
 
@@ -52,7 +50,7 @@ Then evaluate any expression against your grammar in the interactive shell
 ebnfValidator grammar.txt
 ```
 > Welcome to the Interactive Shell! </code>
-Type in any expression and check if matches against the provided ebnfValidator.Grammar Description
+Type in any expression and check if matches against the provided Grammar Description
 Type '.exit' to quit at any time.
 
 ```bash
