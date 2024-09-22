@@ -26,13 +26,10 @@ public class GrammarValidator {
     private Set<Integer> evaluateExpression(Expression expression, Set<Integer> indexSet) {
 
         depth++;
-
         try {
-
             if (depth > MAX_STACK_DEPTH) {
                 return Set.of();
             }
-
             Set<Integer> reachedIdxSet = null;
 
             // expression consists of different options --> only one must be fulfilled
@@ -52,11 +49,9 @@ public class GrammarValidator {
                     reachedIdxSet = evaluateTerm(term, reachedIdxSet);
             }
             return reachedIdxSet;
-
         } finally {
             depth--;
         }
-
     }
 
     private boolean isSelect(Expression expression) {
@@ -117,7 +112,7 @@ public class GrammarValidator {
         return matched;
     }
 
-    private Set<Integer> evaluateRule (Rule r, Set<Integer> indexSet) {
+    private Set<Integer> evaluateRule(Rule r, Set<Integer> indexSet) {
         Expression e = rules.get(r.value);
         return evaluateExpression(e, indexSet);
     }
@@ -135,13 +130,13 @@ public class GrammarValidator {
     public boolean isValid(String expression) {
         depth = 0;
         StatementLexer lexer = new StatementLexer(expression, grammar.literals);
+        tokens = lexer.tokenize();
 
-        // if lexer throws an error, illegal sequence has been supplied which cannot be matched
-        try {
-            tokens = lexer.tokenize();
-        } catch (IllegalArgumentException e) {
+        // allows for an early breakout
+        if (lexer.illegalCharacter)
             return false;
-        }
-        return evaluateExpression(rules.get("expression"), Set.of(0)).contains(tokens.size());
+
+        Expression entry = rules.get("expression");
+        return evaluateExpression(entry, Set.of(0)).contains(tokens.size());
     }
 }

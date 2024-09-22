@@ -11,6 +11,7 @@ import java.util.Set;
  */
 
 class StatementLexer {
+    boolean illegalCharacter = false;
     Set<Token> EBNFTokens;
     List<Token> tokens = new ArrayList<>();
     String statement;
@@ -28,7 +29,7 @@ class StatementLexer {
         }
 
         // scanner ignores whitespace but two rules separated by whitespace can never be one
-        // find longest word that matches a token in the set of allowed tokens
+        // find the longest word that matches a token in the set of allowed tokens
         Token match = new Token("", TokenType.EMPTY);
         for (Token t : EBNFTokens) {
             if (statement.startsWith(t.value, index)) {
@@ -37,7 +38,7 @@ class StatementLexer {
         }
         // what if statement we want to match is empty ?
         if (match.type == TokenType.EMPTY) {
-            throw new IllegalArgumentException("Illegal character " + statement.charAt(index));
+            illegalCharacter = true;
         } else {
             addToken(match);
             index += match.value.length();
@@ -49,7 +50,7 @@ class StatementLexer {
     }
 
     public List<Token> tokenize() {
-        while (!isAtEnd()) {
+        while (!isAtEnd() && !illegalCharacter) {
             scanToken();
         }
         return tokens;

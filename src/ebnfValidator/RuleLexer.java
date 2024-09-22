@@ -8,13 +8,15 @@ import java.util.List;
  */
 
 // ebnfValidator.EBNF LEXER
-class EBNFLexer {
+class RuleLexer {
     List<Token> tokens = new ArrayList<>();
     int index = 0;
     String string;
+    int line;
 
-    public EBNFLexer(String string) {
+    public RuleLexer(String string, int line) {
         this.string = string;
+        this.line = line;
     }
 
     void addToken(Token token) {
@@ -23,6 +25,13 @@ class EBNFLexer {
 
     boolean isAtEnd() {
         return index >= string.length();
+    }
+
+    private void consume(char expected) {
+        if (index >= string.length() || string.charAt(index) != expected) {
+            Logger.error(expected + " expected on line XX");
+        }
+        index++;
     }
 
     char advance() {
@@ -70,26 +79,23 @@ class EBNFLexer {
             advance();
         }
 
-        if (peek() != '"') {
-            throw new IllegalArgumentException("No closing \" detected");
-        }
-
         // empty string
-        if (index == start)
-            addToken(new Token("", TokenType.EMPTY));
-        else
-            addToken(new Token(string.substring(start, index), TokenType.LITERAL));
-        // consume closing "
-        advance();
+        if (index == start) addToken(new Token("", TokenType.EMPTY));
+        else addToken(new Token(string.substring(start, index), TokenType.LITERAL));
+        consume('"');
     }
 
     private void addLiteral() {
         int start = index;
 
-        while (peek() != ' ' && !isAtEnd() && peek() != '"') {
+        while (peek() != ' ' && !isAtEnd() && !isSpecial(peek())) {
             advance();
         }
         addToken(new Token(string.substring(start - 1, index), TokenType.LITERAL));
+    }
+
+    private boolean isSpecial(char c) {
+        return c == '|' || c == '[' || c == ']' || c == '(' || c == ')' || c == '{' || c == '}';
     }
 
     private void addRule() {
@@ -98,14 +104,9 @@ class EBNFLexer {
         while (peek() != '>' && !isAtEnd()) {
             advance();
         }
-
-        if (peek() != '>') {
-            throw new IllegalArgumentException("No closing > detected");
-        }
-
         addToken(new Token(string.substring(start, index), TokenType.RULE));
         // consume closing >
-        advance();
+        consume('>');
     }
 
 }

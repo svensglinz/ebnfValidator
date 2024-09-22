@@ -14,7 +14,8 @@ class Expression {
 class Term {
     Expression expression;
 
-    public Term() {}
+    public Term() {
+    }
 
     public Term(Expression expression) {
         this.expression = expression;
@@ -24,7 +25,7 @@ class Term {
 class Terminal extends Term {
     String value;
 
-    public Terminal (String value) {
+    public Terminal(String value) {
         this.value = value;
     }
 }
@@ -32,7 +33,7 @@ class Terminal extends Term {
 class Rule extends Term {
     String value;
 
-    public Rule (String value) {
+    public Rule(String value) {
         this.value = value;
     }
 }

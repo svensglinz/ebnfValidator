@@ -2,14 +2,10 @@ package ebnfValidator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Scanner;
+import java.util.*;
 
-import ebnfValidator.EBNFParser.*;
+import static ebnfValidator.TokenType.RULE;
+
 /**
  * Utility class that reads a grammar description and returns each line in an array list
  * for further processing
@@ -45,40 +41,33 @@ public class Grammar {
 
     // returns a map of unparsed grammar rules with {rule name, rule description} pairs
     private Map<String, String> readRules(String fileName) throws FileNotFoundException {
-        Map<String, String> rules = new HashMap<>();
-        Scanner scanner;
-        scanner = new Scanner(new File(fileName));
+        Map<String, String> rules = new LinkedHashMap<>();
+        Scanner scanner = new Scanner(new File(fileName));
         int lineNr = 1;
 
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
-
-            // replace excess whitespace
             line = line.replaceAll("\\s+", " ");
-
-            // get first "<=" and split into rule name and body
             int pos = line.indexOf("<=");
 
             if (pos < 0) {
-                System.err.println("Error in line " + lineNr + ": " + line);
-
+                Logger.error("Error while parsing Grammar. No <= detected in Line " + lineNr);
             }
 
             String[] args = {line.substring(0, pos), line.substring(pos + 2)};
             args[0] = args[0].trim();
             args[0] = args[0].substring(1, args[0].length() - 1);
-
-            // add rule name as key, rule description as value
             rules.put(args[0].trim(), args[1].trim());
         }
         return rules;
     }
 
-    // turns a tokenized rule into a parsed rule that is represented by a tree of GrammarElement objects
+    // turns a tokenized rule into a parsed rule that is represented by a tree of Expression objects
     private Map<String, Expression> parseRules(Map<String, List<Token>> tokenizedRules) {
-        Map<String, Expression> parsedRules = new HashMap<>();
+        int lineNr = 1;
+        Map<String, Expression> parsedRules = new LinkedHashMap<>();
         for (Map.Entry<String, List<Token>> rule : tokenizedRules.entrySet()) {
-            EBNFParser parser = new EBNFParser(rule.getValue());
+            RuleParser parser = new RuleParser(rule.getValue(), lineNr++);
             parsedRules.put(rule.getKey(), parser.parse());
         }
         return parsedRules;
@@ -86,17 +75,30 @@ public class Grammar {
 
     // return a map with { rule name, tokenized rule } key-value pairs
     private Map<String, List<Token>> tokenizeRules(Map<String, String> unparsedRules) {
-        Map<String, List<Token>> tokenizedRules = new HashMap<>();
+        Map<String, List<Token>> tokenizedRules = new LinkedHashMap<>();
+        int lineNr = 1;
+
         for (Map.Entry<String, String> rule : unparsedRules.entrySet()) {
+            RuleLexer lexer = new RuleLexer(rule.getValue(), lineNr++);
+            List<Token> tokens = lexer.tokenize();
+            tokenizedRules.put(rule.getKey(), tokens);
+        }
+        // check that each referenced rule exists
+        Set<String> ruleNames = tokenizedRules.keySet();
 
-            EBNFLexer lexer = new EBNFLexer(rule.getValue());
-
-            try {
-                List<Token> tokens = lexer.tokenize();
-                tokenizedRules.put(rule.getKey(), tokens);
-            } catch (IllegalArgumentException e) {
-                System.err.println(e.getMessage());
+        lineNr = 1;
+        for (List<Token> tokens : tokenizedRules.values()) {
+            for (Token token : tokens) {
+                if (token.type.equals(RULE) && !ruleNames.contains(token.value)) {
+                    Logger.error("Error while parsing line " + lineNr + "\n Rule " + token.value + " has not been declared");
+                }
             }
+            lineNr++;
+        }
+
+        // make sure that expression is declared (main entry point)
+        if (!ruleNames.contains("expression")) {
+            Logger.error("No rule called expression found in grammar. This is needed as the main entry point");
         }
         return tokenizedRules;
     }

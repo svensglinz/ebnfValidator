@@ -11,23 +11,18 @@ public class EBNF {
             System.exit(1);
         }
 
-        // start interactive shell
-        Grammar grammar = loadGrammar(args[0]);
-        interactive(grammar);
-    }
-
-    public static Grammar loadGrammar(String path) {
+        // try loading grammar
         Grammar grammar = null;
         try {
-            grammar = new Grammar(path);
+            grammar = new Grammar(args[0]);
         } catch (FileNotFoundException e) {
-            System.err.println("File " + path + "not found");
+            System.err.println("File not found: " + args[0]);
             System.exit(1);
-        } catch (IllegalArgumentException r) {
-            System.out.println(r.getMessage());
+        } catch (parseError e) {
+            System.err.println(e.getMessage());
             System.exit(1);
         }
-        return grammar;
+        interactive(grammar);
     }
 
     private static void interactive(Grammar grammar) {
@@ -42,10 +37,8 @@ public class EBNF {
             System.out.print("> ");
             String line = scanner.nextLine();
             if (line == null || line.equals(".exit")) {
-                System.out.println("Good bye!");
                 break;
-            }
-            if (grammar.isValid(line)) {
+            } else if (grammar.isValid(line)) {
                 System.out.println("\u2714" + BOLD + " valid" + RESET);
             } else {
                 System.out.println("\u274c" + BOLD + " invalid" + RESET);

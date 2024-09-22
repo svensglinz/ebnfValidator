@@ -8,12 +8,13 @@ import static ebnfValidator.TokenType.*;
 /**
  * parses a single body of a rule
  */
-class EBNFParser {
+class RuleParser {
     List<Token> tokens;
     int idx = 0;
-
-    public EBNFParser(List<Token> tokens) {
+    int lineNr;
+    public RuleParser(List<Token> tokens, int lineNr) {
         this.tokens = tokens;
+        this.lineNr = lineNr;
     }
 
     private void consumeToken(TokenType expected) {
@@ -21,7 +22,7 @@ class EBNFParser {
         if (cur.type.equals(expected)) {
             idx++;
         } else {
-            throw new IllegalArgumentException("Unexpected token: " + expected);
+            Logger.error("Error while parsing line " + lineNr + "\n" + "Expected " + expected + " at position " + idx);
         }
     }
 
@@ -103,11 +104,6 @@ class EBNFParser {
         }
         // process entire expression
         preprocessBlock(0, tokens.size() - 1);
-    }
-
-    private boolean isRuleOrLiteral(int i) {
-        TokenType t = tokens.get(i).type;
-        return t.equals(LITERAL) || t.equals(RULE);
     }
 
     private void preprocessBlock(int start, int end) {
