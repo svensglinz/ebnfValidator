@@ -2,8 +2,12 @@ package ebnfValidator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.*;
-
+import java.util.Map;
+import java.util.List;
+import java.util.Set;
+import java.util.Scanner;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import static ebnfValidator.TokenType.RULE;
 
 /**

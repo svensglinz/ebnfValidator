@@ -12,6 +12,10 @@ class Logger {
         throw new parseError(red + msg + reset);
     }
 
+    public static void printError(String msg) {
+        System.out.println(red + msg + reset);
+    }
+
     public static void warning(String msg) {
         System.out.println(yellow + msg + reset);
     }

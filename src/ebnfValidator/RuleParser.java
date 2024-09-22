@@ -2,7 +2,6 @@ package ebnfValidator;
 
 import java.util.List;
 import java.util.Stack;
-
 import static ebnfValidator.TokenType.*;
 
 /**

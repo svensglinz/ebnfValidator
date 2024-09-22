@@ -10,13 +10,12 @@ public class EBNF {
             System.out.println("Usage: java ebnf <grammar>");
             System.exit(1);
         }
-
         // try loading grammar
         Grammar grammar = null;
         try {
             grammar = new Grammar(args[0]);
         } catch (FileNotFoundException e) {
-            System.err.println("File not found: " + args[0]);
+            Logger.printError("File " + args[0] + " not found");
             System.exit(1);
         } catch (parseError e) {
             System.err.println(e.getMessage());

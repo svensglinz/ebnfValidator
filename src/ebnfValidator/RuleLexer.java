@@ -109,5 +109,4 @@ class RuleLexer {
         // consume closing >
         consume('>');
     }
-
 }
