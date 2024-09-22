@@ -18,12 +18,11 @@ class RuleParser {
     }
 
     private void consumeToken(TokenType expected) {
-        Token cur = tokens.get(idx);
-        if (cur.type.equals(expected)) {
-            idx++;
-        } else {
-            Logger.error("Error while parsing line " + lineNr + "\n" + "Expected " + expected + " at position " + idx);
+        if (idx >= tokens.size() || !tokens.get(idx).type.equals(expected)) {
+            String found = idx >= tokens.size() ? "EOF" : tokens.get(idx).value;
+            Logger.error("Error while parsing line " + lineNr + "\n" + "Expected " + expected + " but found: " + found);
         }
+        idx++;
     }
 
     private Token advance() {

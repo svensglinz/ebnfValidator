@@ -7,8 +7,8 @@ import java.util.*;
 import static ebnfValidator.TokenType.RULE;
 
 /**
- * Utility class that reads a grammar description and returns each line in an array list
- * for further processing
+ * Utility class that reads and parses a Grammar description such
+ * that it can be validated by ebnfValidator.grammarValidator
  */
 
 public class Grammar {
@@ -16,7 +16,6 @@ public class Grammar {
     Map<String, List<Token>> tokenizedRules;
     Map<String, Expression> parsedRules;
     Set<Token> literals;
-    GrammarValidator validator;
 
     public Grammar(String fileName) throws FileNotFoundException {
         // process Grammar step by steps
@@ -24,7 +23,6 @@ public class Grammar {
         tokenizedRules = tokenizeRules(unparsedRules);
         parsedRules = parseRules(tokenizedRules);
         literals = getLiterals(tokenizedRules);
-        validator = new GrammarValidator(this);
     }
 
     // returns a set of literals extracted from tokenized rules
@@ -101,9 +99,5 @@ public class Grammar {
             Logger.error("No rule called expression found in grammar. This is needed as the main entry point");
         }
         return tokenizedRules;
-    }
-
-    public boolean isValid(String expression) {
-        return validator.isValid(expression);
     }
 }

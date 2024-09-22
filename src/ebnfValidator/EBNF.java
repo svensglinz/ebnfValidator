@@ -29,19 +29,23 @@ public class EBNF {
 
         final String RESET = "\033[0m";
         final String BOLD = "\033[1m";
+        final String CHECK = "\u2714";
+        final String CROSS = "\u274c";
 
         printWelcome();
 
+        GrammarValidator validator = new GrammarValidator(grammar);
         Scanner scanner = new Scanner(System.in);
+
         while (true) {
             System.out.print("> ");
             String line = scanner.nextLine();
             if (line == null || line.equals(".exit")) {
                 break;
-            } else if (grammar.isValid(line)) {
-                System.out.println("\u2714" + BOLD + " valid" + RESET);
+            } else if (validator.isValid(line)) {
+                System.out.println(CHECK + BOLD + " valid" + RESET);
             } else {
-                System.out.println("\u274c" + BOLD + " invalid" + RESET);
+                System.out.println(CROSS + BOLD + " invalid" + RESET);
             }
         }
     }

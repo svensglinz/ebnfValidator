@@ -29,7 +29,8 @@ class RuleLexer {
 
     private void consume(char expected) {
         if (index >= string.length() || string.charAt(index) != expected) {
-            Logger.error(expected + " expected on line XX");
+            String found = index >= string.length() ? "EOF" : string.substring(index, index + 1);
+            Logger.error("Error while parsing line " + line + " expected " + expected + " but found: " + found);
         }
         index++;
     }

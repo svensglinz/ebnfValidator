@@ -79,11 +79,12 @@ public class GrammarValidator {
     private Set<Integer> evaluateMultiple(Multiple m, Set<Integer> indexSet) {
         Set<Integer> reachedIdxSet = new HashSet<>(indexSet);
         Set<Integer> curIndices = indexSet;
-
+        boolean addedNew;
         do {
             curIndices = evaluateExpression(m.expression, curIndices);
-            reachedIdxSet.addAll(curIndices);
-        } while (!curIndices.isEmpty());
+            addedNew = reachedIdxSet.addAll(curIndices);
+            // stop once we cannot reach more indices
+        } while (addedNew);
         return reachedIdxSet;
     }
 

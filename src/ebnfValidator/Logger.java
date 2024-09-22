@@ -21,6 +21,7 @@ class Logger {
     }
 }
 
+// only error class for the moment
 class parseError extends RuntimeException {
     public parseError(String msg) {
         super(msg);
