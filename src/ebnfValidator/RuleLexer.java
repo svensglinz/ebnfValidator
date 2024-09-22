@@ -96,7 +96,7 @@ class RuleLexer {
     }
 
     private boolean isSpecial(char c) {
-        return c == '|' || c == '[' || c == ']' || c == '(' || c == ')' || c == '{' || c == '}';
+        return c == '|' || c == '[' || c == ']' || c == '(' || c == ')' || c == '{' || c == '}' || c == '<' || c == '>';
     }
 
     private void addRule() {

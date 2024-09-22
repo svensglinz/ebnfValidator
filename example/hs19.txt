@@ -1,0 +1,11 @@
+<digit> <= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+<separator> <= _
+<char> <= A | B | C | D | E | F | a | b | c | d | e | f
+<num> <= <digit> {[ <separator>]<digit>}
+<int> <= <digit>{<digit>}
+<real> <= <digit>{<digit>}[.<digit>{<digit>}]
+<cd> <= <char> | <digit>
+<hexa1> <= <cd>{<cd>}
+<hexa2> <= <digit> {<digit>} h
+<hexa> <= <hexa1> | <hexa2>
+<expression> <= <num> | <real> | <int> | <hexa>
