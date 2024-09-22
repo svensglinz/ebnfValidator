@@ -34,7 +34,7 @@ public class Grammar {
         Set<Token> literals = new HashSet<>();
         for (List<Token> tokenList : tokenizedRules.values()) {
             for (Token token : tokenList) {
-                if (token.type == TokenType.LITERAL)
+                if (token.type == TokenType.LITERAL || token.type == TokenType.EMPTY)
                     literals.add(token);
             }
         }

@@ -81,7 +81,7 @@ class RuleLexer {
         }
 
         // empty string
-        if (index == start) addToken(new Token("", TokenType.EMPTY));
+        if (index == start) addToken(new Token("\"\"", TokenType.EMPTY));
         else addToken(new Token(string.substring(start, index), TokenType.LITERAL));
         consume('"');
     }

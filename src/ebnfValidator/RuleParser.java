@@ -34,7 +34,7 @@ class RuleParser {
             Token next = tokens.get(idx);
             switch (next.type) {
                 case SELECT_OPEN -> expression.add(parseSelect());
-                case LITERAL -> expression.add(new Terminal(advance().value));
+                case LITERAL, EMPTY -> expression.add(new Terminal(advance().value));
                 case GROUP_OPEN -> expression.add(parseGroup());
                 case MULTIPLE_OPEN -> expression.add(parseMultiple());
                 case OPTION_OPEN -> expression.add(parseOption());

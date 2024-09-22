@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static ebnfValidator.TokenType.EMPTY;
+
 /**
  * Tokenizes a statement into different tokens (literals) given the set of possible
  * literals that occur in the Grammar Rules.
@@ -24,20 +26,23 @@ class StatementLexer {
 
     void scanToken() {
         // skip whitespace
-        while (statement.charAt(index) == ' ') {
+        while (!isAtEnd() && statement.charAt(index) == ' ') {
             index++;
         }
 
         // scanner ignores whitespace but two rules separated by whitespace can never be one
         // find the longest word that matches a token in the set of allowed tokens
-        Token match = new Token("", TokenType.EMPTY);
+        Token match = null;
         for (Token t : EBNFTokens) {
             if (statement.startsWith(t.value, index)) {
-                match = t.value.length() > match.value.length() ? t : match;
+                if (match == null)
+                    match = t;
+                else
+                    match = t.value.length() > match.value.length() ? t : match;
             }
         }
-        // what if statement we want to match is empty ?
-        if (match.type == TokenType.EMPTY) {
+        // if statement contains characters not in grammar, allow early breakout
+        if (match == null) {
             illegalCharacter = true;
         } else {
             addToken(match);

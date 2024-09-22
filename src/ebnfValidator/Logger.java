@@ -2,7 +2,6 @@ package ebnfValidator;
 
 // tires to return as many informational errors as possible
 class Logger {
-    static boolean hasError = false;
     static private final String red = "\u001B[31m";
     static private final String green = "\u001B[32m";
     static private final String yellow = "\u001B[33m";
